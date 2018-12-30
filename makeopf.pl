@@ -133,20 +133,7 @@ ITEM
         $ncx .= $item;
         $index++;
     }
-    $ncx .= <<NCXEND;
- <pageList>
-  <navLabel>
-    <text>Pages</text>
-  </navLabel>
-  <pageTarget type="normal" id="pagenumber1" value="1">
-    <navLabel>
-    ¦ <text>this pageList does nothing, but it keeps kindlegen from complaing</text>
-    </navLabel>
-    <content src="${title}.html#Page1"/>
-  </pageTarget>
-</pageList>
-</ncx>
-NCXEND
+    $ncx .= "</ncx>";
     say "build ncx success";
     open my $ncx_fh, ">", "${title}.ncx" or die "open ncx fail";
     print $ncx_fh $ncx;
@@ -157,11 +144,10 @@ NCXEND
 # ${title}.html
 sub make_content {
     open HTML, ">", "${title}.html" or die "write content html fail";
-    my $replace = <<FORMAT;
-<a id="start"></a>
-<a id="Page1"></a>
-FORMAT
+    my $replace = '<a id="start"></a>';
     $html =~ s|\A(.*?)(<h\d class="title">.*?</h\d>).*?<div id="table-of-contents">.*?</div>\s*</div>(.*)\Z|$1$replace$2$3|s;
+    $html =~ s#\A(.*?)<style type="text/css">.*?</style>(.*)\Z#$1$2#s;
+    while ( $html =~ s#\A(.*?)<script type="text/.*?</script>(.*)\Z#$1$2#s ) {};
     print HTML $html;
     close HTML;
 }
